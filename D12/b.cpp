@@ -2,63 +2,45 @@
 #include "../aoc.h"
 
 using namespace std;
-struct Mem {
-	int cur;
-	int i;
-	int q;
-};
 
-Mem makeMem(int cur, int i, int q){
-	Mem mi;
-	mi.cur = cur;
-	mi.i = i;
-	mi.q = q;
-	return mi;
-}
-bool operator<(const Mem& l, const Mem& r) {
-     return (l.cur<r.cur || (l.cur==r.cur && l.i<r.i) || (l.cur == r.cur && l.i == l.i && l.q < r.q));
-}
+long long mem[200][200][200][3];
 vector<int> d;
 string c;
-map<Mem, int> m;
-int prc(int cur, int i, int q, char rep='x'){
-	char ci;
-	if(rep == 'x') ci = c[cur];
-	else ci = rep;
-	Mem me = makeMem(cur, i, q);
-	if(m.find(me) != m.end()){
-		return m[me];
-	}
+long long prc(long long cur, long long i, long long q, long long rep=0){
+	//cout<<cur<<" "<<i<<" "<<q<<endl;
+	char ci = (rep == 0)? c[cur] : (rep == 1)? '#' : '.';
+	if(mem[cur][i][q][rep] != -1) return mem[cur][i][q][rep];
 	if(cur == c.size() && q == d.size()){ 
-		return m[me] = 1;
+		return mem[cur][i][q][rep] = 1;
 	}
 	if(cur == c.size()){
-		return m[me] = 0;
+		return mem[cur][i][q][rep] = 0;
 	}
 	if(ci == '#'){
-		return m[me] = prc(cur+1, i+1, q);
+		return mem[cur][i][q][rep] = prc(cur+1, i+1, q);
 	}
 	if(ci == '.'){
 		if(i == 0){
-			return m[me] = prc(cur+1, i, q);
+			return mem[cur][i][q][rep] = prc(cur+1, i, q);
 		}
 		if(q >= d.size()) return 0;
 		if(i == d[q]){
-			return m[me] = prc(cur+1, 0, q+1);
+			return mem[cur][i][q][rep] = prc(cur+1, 0, q+1);
 		}
 		else{
-			return m[me] = 0;
+			return mem[cur][i][q][rep] = 0;
 		}
 	}
 	if(ci == '?'){
-		return m[me] = (prc(cur, i, q, '#') + prc(cur, i, q, '.'));
+		return mem[cur][i][q][rep] = (prc(cur, i, q, 1)+ prc(cur, i, q, 2)); 
 	}
-	return m[me] = 0;
+	return mem[cur][i][q][rep] = 0;
 	
 }
 int main(int argc, char* argv[]){
-	int sum = 0;
+	long long sum = 0;
 	for(const auto& line: getlines(argv[1])){
+		memset(mem, -1, sizeof(long long)*200*200*200*3);
 		string con;
 		for(int i = 0; i < 5; i++){
 			con += split(line, " ")[0];
@@ -77,7 +59,6 @@ int main(int argc, char* argv[]){
 		cout<<c<<endl;
 		sum += prc(0, 0, 0);
 		cout<< prc(0, 0, 0) << endl;
-		m.clear();
 		
 	}
 	cout<<sum<<endl;
